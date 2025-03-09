@@ -31,6 +31,7 @@ const HomeScreen = () => {
         {isLogin ? (
           <View style={styles.formContainer}>
             <LoginForm />
+
             {/* Pass the login success handler */}
             <TouchableOpacity
               onPress={() => setIsLogin(false)}
@@ -38,7 +39,7 @@ const HomeScreen = () => {
               style={styles.switchButton}
             >
               <Text style={styles.switchText}>
-                New here?
+                New here?{" "}
                 <Text style={styles.switchTextBold}>Sign up & Drop In</Text>
               </Text>
             </TouchableOpacity>
@@ -52,12 +53,17 @@ const HomeScreen = () => {
               style={styles.switchButton}
             >
               <Text style={styles.switchText}>
-                Already have an account?
+                Already have an account?{" "}
                 <Text style={styles.switchTextBold}>Log In & Shred</Text>
               </Text>
             </TouchableOpacity>
           </View>
         )}
+        {/* Short site description */}
+        <Text style={styles.descriptionText}>
+          A community built for skaters. Share your clips, discover new spots,
+          and connect with skaters worldwide.
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

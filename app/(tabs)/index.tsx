@@ -152,39 +152,33 @@ const ProfileScreen = () => {
                 />
               )}
               <Text style={profileStyles.username}>@{profile.username}</Text>
-              <TouchableOpacity
-                style={profileStyles.logoutButton}
-                onPress={handleLogout}
-              >
-                <FontAwesome name="sign-out" size={20} color="#fff" />
-              </TouchableOpacity>
             </View>
 
             <View style={profileStyles.profileCard}>
               <View style={profileStyles.detailsRow}>
                 <Ionicons name="person" size={20} color="#fff" />
-                <Text style={profileStyles.detailsLabel}>Full Name:</Text>
+                <Text style={profileStyles.detailsLabel}></Text>
                 <Text style={profileStyles.detailsValue}>
                   {profile.first_name} {profile.last_name}
                 </Text>
               </View>
-              <View style={profileStyles.detailsRow}>
+              {/* <View style={profileStyles.detailsRow}>
                 <Ionicons name="calendar" size={20} color="#fff" />
-                <Text style={profileStyles.detailsLabel}>Age:</Text>
+                <Text style={profileStyles.detailsLabel}></Text>
                 <Text style={profileStyles.detailsValue}>
                   {profile.age || "N/A"}
                 </Text>
-              </View>
+              </View> */}
               <View style={profileStyles.detailsRow}>
                 <Ionicons name="location" size={20} color="#fff" />
-                <Text style={profileStyles.detailsLabel}>Location:</Text>
+                <Text style={profileStyles.detailsLabel}></Text>
                 <Text style={profileStyles.detailsValue}>
                   {profile.location || "N/A"}
                 </Text>
               </View>
               <View style={profileStyles.detailsRow}>
                 <Ionicons name="mail" size={20} color="#fff" />
-                <Text style={profileStyles.detailsLabel}>Email:</Text>
+                <Text style={profileStyles.detailsLabel}></Text>
                 <Text style={profileStyles.detailsValue}>
                   {profile.email || "N/A"}
                 </Text>
@@ -193,6 +187,17 @@ const ProfileScreen = () => {
 
             <View style={profileStyles.postFormContainer}>
               <PostForm />
+            </View>
+            <View style={profileStyles.logoutContainer}>
+              <TouchableOpacity
+                style={profileStyles.logoutButton}
+                onPress={handleLogout}
+              >
+                <Text style={profileStyles.logoutButtonText}>
+                  Hit The Streets
+                </Text>
+                <FontAwesome name="sign-out" size={20} color="#fff" />
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>

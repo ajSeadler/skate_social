@@ -1,8 +1,17 @@
 import React, { useState } from "react";
-import { TextInput, Button, StyleSheet, Alert, View, Text } from "react-native";
+import {
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // For password visibility toggle
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 const API_URL = "http://localhost:5001"; // Your backend API URL
 
@@ -39,7 +48,7 @@ const LoginForm = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Login</Text>
+      <Text style={styles.header}>Welcome!</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -63,7 +72,19 @@ const LoginForm = () => {
           onPress={() => setPasswordVisible(!passwordVisible)}
         />
       </View>
-      <Button title="Login" onPress={handleLogin} color="#4CAF50" />
+      <LinearGradient
+        colors={["#6a11cb", "#2575fc"]} // Blue to purple gradient
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.loginButton}
+      >
+        <TouchableOpacity
+          onPress={handleLogin}
+          style={styles.loginButtonContent}
+        >
+          <Text style={styles.loginButtonText}>Login</Text>
+        </TouchableOpacity>
+      </LinearGradient>
     </View>
   );
 };
@@ -75,7 +96,7 @@ const styles = StyleSheet.create({
     alignItems: "center", // Center the form horizontally
     padding: 20,
     backgroundColor: "rgba(35, 35, 35, 0.5)",
-    borderRadius: 10,
+    borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -113,6 +134,37 @@ const styles = StyleSheet.create({
     right: 10,
     top: 12,
     color: "#fff", // Ensure icon is visible with a white color
+  },
+  loginButton: {
+    backgroundColor: "transparent", // Transparent background for a more minimalist look
+    borderRadius: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderWidth: 1.5,
+    borderColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    marginTop: 20,
+    backgroundImage: "linear-gradient(to right, #6a11cb, #2575fc)", // Blue to purple gradient
+  },
+
+  loginButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff", // White text
+    textAlign: "center",
+  },
+  loginButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

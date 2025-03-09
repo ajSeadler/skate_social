@@ -16,6 +16,21 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: Platform.OS === "ios" ? 80 : 20,
   },
+  descriptionText: {
+    color: "#ffffff",
+    fontSize: 18, // Slightly larger for emphasis
+    fontWeight: "600", // Modern semi-bold
+    textAlign: "center",
+    marginBottom: 30,
+    paddingHorizontal: 30,
+    opacity: 0.9, // Slightly transparent for sleekness
+    lineHeight: 26, // Perfect balance for readability
+    letterSpacing: 0.8, // Subtle spacing for a refined look
+    textShadowColor: "rgba(255, 255, 255, 0.2)", // Soft glow effect
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
+  },
+
   welcomeText: {
     fontSize: 48, // Larger text to make a statement
     fontWeight: "900", // Boldest weight for maximum emphasis

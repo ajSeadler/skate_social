@@ -18,8 +18,8 @@ const profileStyles = StyleSheet.create({
   profileHeader: {
     width: "100%",
     paddingHorizontal: 20,
-    alignItems: "flex-start",
-    marginBottom: 30,
+    alignItems: "center",
+    marginBottom: 10,
   },
   username: {
     fontSize: 28,
@@ -49,25 +49,24 @@ const profileStyles = StyleSheet.create({
   profileCard: {
     backgroundColor: "rgba(35, 35, 35, 0.5)",
     padding: 20,
+    width: "100%",
     marginBottom: 0,
   },
   profileCardHeader: {
     fontSize: 22,
     fontWeight: "700",
     color: "#fff",
-    marginBottom: 5,
   },
   detailsRow: {
     flexDirection: "row",
     alignItems: "center", // Aligns the icon and text vertically
-    marginBottom: 18,
+    marginBottom: 12,
   },
   detailsLabel: {
     fontSize: 18,
     color: "#ddd",
     fontWeight: "bold",
     fontFamily: "Helvetica Neue",
-    width: "40%",
     marginLeft: 10, // Added space between the icon and the label
   },
   detailsValue: {
@@ -78,17 +77,35 @@ const profileStyles = StyleSheet.create({
     flexShrink: 1, // Prevents overflow by shrinking text if necessary
     flexWrap: "wrap", // Allows wrapping of long text
   },
-  logoutButton: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: "#222",
-    borderRadius: 5,
+
+  logoutContainer: {
+    width: "100%",
     alignItems: "center",
+    marginTop: 40,
   },
+
+  logoutButton: {
+    backgroundColor: "#E63946", // A professional red tone for logout
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30, // Rounded for a modern look
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   logoutButtonText: {
     color: "#fff",
     fontSize: 18,
+    fontWeight: "bold",
+    marginRight: 10,
   },
+
   center: {
     flex: 1,
     justifyContent: "center",

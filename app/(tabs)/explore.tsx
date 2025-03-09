@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Image,
@@ -5,22 +6,35 @@ import {
   ScrollView,
   View,
   Dimensions,
-  Platform,
+  TouchableOpacity,
 } from "react-native";
-import { useEffect, useState } from "react";
-import { LinearGradient } from "expo-linear-gradient"; // or from react-native-linear-gradient
-
+import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BlurView } from "expo-blur"; // Import BlurView
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
-const { width, height } = Dimensions.get("window"); // Get screen width and height
+const { width, height } = Dimensions.get("window");
 
 export default function TabTwoScreen() {
-  const [posts, setPosts] = useState<any[]>([]); // State for storing posts
-  const [loading, setLoading] = useState<boolean>(true); // State for loading indicator
-  const [error, setError] = useState<string | null>(null); // State for error handling
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isOverlayVisible, setIsOverlayVisible] = useState<boolean>(false);
 
-  // Function to fetch posts from API
+  const getToken = async () => {
+    try {
+      const storedToken = await AsyncStorage.getItem("token");
+      setToken(storedToken);
+      if (!storedToken) {
+        setIsOverlayVisible(true);
+      }
+    } catch (err) {
+      console.error("Error retrieving token", err);
+    }
+  };
+
   const fetchPosts = async () => {
     try {
       const response = await fetch("http://localhost:5001/posts", {
@@ -35,7 +49,7 @@ export default function TabTwoScreen() {
       }
 
       const data = await response.json();
-      setPosts(data.posts); // Assuming the response contains a 'posts' key
+      setPosts(data.posts);
     } catch (err) {
       setError("Error loading posts");
     } finally {
@@ -44,7 +58,8 @@ export default function TabTwoScreen() {
   };
 
   useEffect(() => {
-    fetchPosts(); // Fetch posts on component mount
+    getToken();
+    fetchPosts();
   }, []);
 
   if (loading) {
@@ -65,16 +80,14 @@ export default function TabTwoScreen() {
 
   return (
     <View style={styles.safeAreaContainer}>
-      {/* Linear Gradient without absoluteFillObject */}
       <LinearGradient
         colors={["#0f0c29", "#302b63", "#24243e"]}
-        style={styles.gradient} // Gradient as background
+        style={styles.gradient}
       >
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
-          style={styles.scrollView} // Add scrollView style for padding adjustment
+          style={styles.scrollView}
         >
-          {/* Title container with transparent background */}
           <ThemedView style={styles.titleContainer}>
             <ThemedText type="title" style={styles.titleText}>
               sesh.
@@ -103,6 +116,15 @@ export default function TabTwoScreen() {
             <ThemedText style={styles.noPosts}>No posts available</ThemedText>
           )}
         </ScrollView>
+
+        {/* Blurred Overlay */}
+        {isOverlayVisible && (
+          <BlurView intensity={50} tint="dark" style={styles.overlay}>
+            <ThemedText style={styles.overlayText}>
+              Please create an account to view awesome skate content.
+            </ThemedText>
+          </BlurView>
+        )}
       </LinearGradient>
     </View>
   );
@@ -110,16 +132,16 @@ export default function TabTwoScreen() {
 
 const styles = StyleSheet.create({
   safeAreaContainer: {
-    flex: 1, // Allow full screen height
+    flex: 1,
   },
   gradient: {
-    flex: 1, // Ensures that gradient fills the screen properly
+    flex: 1,
   },
   scrollView: {
-    paddingBottom: 70, // Account for the tab bar height (adjust based on your tab bar's height)
+    paddingBottom: 70,
   },
   scrollViewContent: {
-    flexGrow: 1, // Ensures content can grow and fill up remaining space
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 80,
@@ -130,20 +152,19 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 20,
     paddingHorizontal: 20,
-    backgroundColor: "transparent", // Transparent background
-
-    width: width, // Make sure it spans the entire width
+    backgroundColor: "transparent",
+    width: width,
   },
   titleText: {
     fontSize: 28,
     fontWeight: "900",
     color: "#fff",
     textAlign: "left",
-    fontFamily: "Urbanist_700Bold", // Use a bold, modern font
-    letterSpacing: 2, // Slight letter spacing for a clean look
-    textShadowColor: "rgba(255, 255, 255, 0.3)", // Subtle glow effect
+    fontFamily: "Urbanist_700Bold",
+    letterSpacing: 2,
+    textShadowColor: "rgba(255, 255, 255, 0.3)",
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10, // Soft shadow to make it pop
+    textShadowRadius: 10,
   },
   loadingContainer: {
     flex: 1,
@@ -167,15 +188,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    width: width * 0.9, // Set the width to 90% of the screen
+    width: width * 0.9,
   },
   username: {
     fontWeight: "bold",
-    color: "#FFFFFF", // White color for username
+    color: "#FFFFFF",
     marginBottom: 10,
   },
   content: {
-    color: "#E0E0E0", // Lighter gray for post content
+    color: "#E0E0E0",
     marginBottom: 10,
   },
   postImage: {
@@ -187,12 +208,36 @@ const styles = StyleSheet.create({
   timestamp: {
     marginTop: 8,
     fontSize: 12,
-    color: "#A0A0A0", // Lighter gray for timestamp
+    color: "#A0A0A0",
   },
   noPosts: {
-    color: "#A0A0A0", // Lighter gray for no posts text
+    color: "#A0A0A0",
     fontSize: 16,
     textAlign: "center",
     marginTop: 20,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // Makes the overlay cover the entire screen
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  overlayText: {
+    fontSize: 20,
+    color: "#fff",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  button: {
+    padding: 12,
+    backgroundColor: "#FF5733",
+    borderRadius: 8,
+    width: 200,
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
