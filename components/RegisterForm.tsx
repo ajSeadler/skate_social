@@ -69,6 +69,7 @@ const RegisterForm: React.FC = () => {
         <TextInput
           style={styles.input}
           placeholder="Username"
+          autoCapitalize="none"
           value={form.username}
           onChangeText={(username) => setForm({ ...form, username })}
         />
@@ -78,11 +79,13 @@ const RegisterForm: React.FC = () => {
           value={form.email}
           onChangeText={(email) => setForm({ ...form, email })}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.input}
             placeholder="Password"
+            autoCapitalize="none"
             secureTextEntry={!passwordVisible}
             value={form.password}
             onChangeText={(password) => setForm({ ...form, password })}

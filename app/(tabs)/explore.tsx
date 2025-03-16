@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Image,
@@ -7,6 +7,7 @@ import {
   View,
   Dimensions,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,6 +23,7 @@ export default function TabTwoScreen() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isOverlayVisible, setIsOverlayVisible] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false); // For pull-to-refresh
 
   const getToken = async () => {
     try {
@@ -54,12 +56,19 @@ export default function TabTwoScreen() {
       setError("Error loading posts");
     } finally {
       setLoading(false);
+      setRefreshing(false); // Stop refreshing when data is loaded
     }
   };
 
   useEffect(() => {
     getToken();
     fetchPosts();
+  }, []);
+
+  // Handle pull-to-refresh
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchPosts(); // Re-fetch posts on pull-to-refresh
   }, []);
 
   if (loading) {
@@ -86,19 +95,28 @@ export default function TabTwoScreen() {
       >
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
+          keyboardShouldPersistTaps="handled"
+          contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor="#ffffff"
+            />
+          }
         >
-          <ThemedView style={styles.titleContainer}>
+          {/* <ThemedView style={styles.titleContainer}>
             <ThemedText type="title" style={styles.titleText}>
               sesh.
             </ThemedText>
-          </ThemedView>
+          </ThemedView> */}
 
           {posts.length > 0 ? (
             posts.map((post) => (
               <ThemedView key={post.id} style={styles.postContainer}>
                 <ThemedText type="defaultSemiBold" style={styles.username}>
-                  {post.username}
+                  @{post.username}
                 </ThemedText>
                 <ThemedText style={styles.content}>{post.content}</ThemedText>
                 {post.image_url && (

@@ -1,9 +1,13 @@
 import { StyleSheet } from "react-native";
+import { Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window"); // Get the screen width
 
 // Added contentContainerStyle for ScrollView and adjusted layout to allow scrolling
 const profileStyles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
+    marginTop: 20,
   },
   gradient: {
     ...StyleSheet.absoluteFillObject,
@@ -47,20 +51,29 @@ const profileStyles = StyleSheet.create({
     elevation: 8,
   },
   profileCard: {
-    backgroundColor: "rgba(35, 35, 35, 0.5)",
+    // backgroundColor: "rgba(35, 35, 35, 0.5)",
     padding: 20,
     width: "100%",
-    marginBottom: 0,
+    borderBottomWidth: 2,
+    borderBottomColor: "#666",
   },
   profileCardHeader: {
     fontSize: 22,
     fontWeight: "700",
     color: "#fff",
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // This spreads elements apart
+    width: "100%", // Ensures it takes full width
+    marginTop: 10, // Adjust for spacing
+  },
+
   detailsRow: {
     flexDirection: "row",
     alignItems: "center", // Aligns the icon and text vertically
-    marginBottom: 12,
+    marginBottom: 10,
   },
   detailsLabel: {
     fontSize: 18,
@@ -72,7 +85,8 @@ const profileStyles = StyleSheet.create({
   detailsValue: {
     fontSize: 18,
     color: "#fff",
-    fontWeight: "500",
+    marginLeft: 1,
+    fontWeight: "bold",
     fontFamily: "Helvetica Neue",
     flexShrink: 1, // Prevents overflow by shrinking text if necessary
     flexWrap: "wrap", // Allows wrapping of long text
@@ -122,6 +136,81 @@ const profileStyles = StyleSheet.create({
     color: "#FF6347",
     marginTop: 15,
     fontFamily: "Helvetica Neue",
+  },
+  postsContainer: {
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 20,
+    textAlign: "left",
+    letterSpacing: 1.5,
+  },
+
+  streakContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  streakText: {
+    color: "#FFF", // Flame color for the streak text
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+
+  postCard: {
+    marginBottom: 20,
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: "rgba(35, 35, 35, 0.5)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    width: width * 0.9,
+  },
+
+  postUsername: {
+    fontWeight: "900",
+    color: "#fff",
+    textAlign: "left",
+    fontFamily: "Urbanist_700Bold",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    marginBottom: 5,
+  },
+
+  postContent: {
+    fontSize: 16,
+    color: "#fff",
+    lineHeight: 24,
+    marginBottom: 10,
+    textAlign: "justify",
+  },
+  postImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+    resizeMode: "cover",
+  },
+  postDate: {
+    fontSize: 12,
+    color: "#a9a9a9",
+    textAlign: "right",
+    marginTop: 10,
+  },
+
+  // No Posts Text
+  noPostsText: {
+    fontSize: 16,
+    color: "#b0b0b0",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

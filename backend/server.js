@@ -72,7 +72,7 @@ app.post("/register", async (req, res) => {
     );
 
     // Generate JWT token
-    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: "1w" });
 
     res.json({ message: "User registered successfully", token });
   } catch (err) {
@@ -172,6 +172,36 @@ app.post("/posts", verifyToken, async (req, res) => {
       .json({ message: "Post created successfully", post: newPost });
   } catch (err) {
     console.error("❌ Error creating post:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET route to view all posts made by the logged-in user (GET /my-posts)
+// GET route to view all posts made by the logged-in user (GET /my-posts)
+app.get("/my-posts", verifyToken, async (req, res) => {
+  const userId = req.userId; // Extract userId from token
+
+  try {
+    const userPostsResult = await pool.query(
+      `SELECT p.id, p.content, p.image_url, p.created_at, u.username 
+       FROM posts p
+       JOIN users u ON p.user_id = u.id 
+       WHERE p.user_id = $1 
+       ORDER BY p.created_at DESC`,
+      [userId]
+    );
+
+    const userPosts = userPostsResult.rows;
+
+    if (userPosts.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "You have not made any posts yet" });
+    }
+
+    res.json({ posts: userPosts });
+  } catch (err) {
+    console.error("❌ Error fetching user's posts:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -5,6 +5,7 @@ const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD, // Ensure you include this
   port: process.env.DB_PORT,
 });
 
@@ -91,10 +92,39 @@ const createTables = async () => {
   try {
     await pool.query(query);
     console.log("✅ Tables dropped and recreated successfully.");
+    await seedDatabase(); // Call the function after creating tables
   } catch (err) {
     console.error("❌ Error dropping and recreating tables:", err);
   } finally {
     await pool.end();
+  }
+};
+
+// Function to seed the database with a default user and post
+const seedDatabase = async () => {
+  try {
+    await pool.query("BEGIN"); // Start a transaction
+
+    // Insert default user
+    const userResult = await pool.query(
+      `INSERT INTO users (username, email, password) 
+       VALUES ($1, $2, $3) RETURNING id`,
+      ["defaultUser", "default@example.com", "hashedpassword123"]
+    );
+    const userId = userResult.rows[0].id;
+
+    // Insert default post linked to the user
+    await pool.query(
+      `INSERT INTO posts (user_id, content) 
+       VALUES ($1, $2)`,
+      [userId, "This is a default post!"]
+    );
+
+    await pool.query("COMMIT"); // Commit transaction
+    console.log("✅ Default user and post created successfully.");
+  } catch (err) {
+    await pool.query("ROLLBACK"); // Rollback transaction if any error
+    console.error("❌ Error seeding the database:", err);
   }
 };
 

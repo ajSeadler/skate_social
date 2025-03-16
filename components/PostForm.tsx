@@ -6,6 +6,8 @@ import {
   View,
   Alert,
   Dimensions,
+  TouchableOpacity,
+  Text,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // for handling storage
 
@@ -16,7 +18,11 @@ interface PostFormState {
   image_url?: string;
 }
 
-const PostForm = () => {
+interface PostFormProps {
+  onPostCreated: () => void; // Callback function after post creation
+}
+
+const PostForm: React.FC<PostFormProps> = ({ onPostCreated }) => {
   const [form, setForm] = useState<PostFormState>({
     content: "",
     image_url: "",
@@ -51,6 +57,7 @@ const PostForm = () => {
       if (response.ok) {
         Alert.alert("Post Created", "Your post has been successfully created!");
         setForm({ content: "", image_url: "" }); // Reset form
+        onPostCreated(); // Trigger the callback after successful post creation
       } else {
         Alert.alert("Error", data.error || "Something went wrong");
       }
@@ -75,17 +82,23 @@ const PostForm = () => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Image URL (Optional)"
+        placeholder="Optional: Share a Clip"
         value={form.image_url}
         onChangeText={(image_url) => setForm({ ...form, image_url })}
         placeholderTextColor="#A0A0A0"
       />
-      <Button
-        title={isLoading ? "Submitting..." : "Submit Post"}
+      <TouchableOpacity
+        style={[
+          styles.submitButton,
+          isLoading ? styles.buttonDisabled : styles.buttonActive,
+        ]}
         onPress={handlePostSubmit}
-        color="#4CAF50"
         disabled={isLoading}
-      />
+      >
+        <Text style={styles.submitButtonText}>
+          {isLoading ? "Submitting..." : "Submit Post"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -94,15 +107,17 @@ const { width } = Dimensions.get("window"); // Get screen width
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "rgba(35, 35, 35, 0.5)",
+    // backgroundColor: "rgba(35, 35, 35, 0.5)",
+    backgroundColor: "#222",
+
     borderRadius: 10,
     padding: 20,
     marginTop: 15,
-    width: width * 0.95, // Set the width to 90% of the screen width
+    width: width * 0.95, // Set the width to 95% of the screen width
     alignSelf: "center", // Center the form horizontally
   },
   input: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#333",
     color: "#fff",
     paddingHorizontal: 15,
     paddingVertical: 12,
@@ -111,6 +126,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "400",
     width: "100%", // Ensure inputs fill the container width
+  },
+  submitButton: {
+    borderRadius: 12, // Rounded corners for the button
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5, // For Android shadow
+  },
+  buttonActive: {
+    backgroundColor: "#4CAF50", // Green button for active state
+  },
+  buttonDisabled: {
+    backgroundColor: "#A5D6A7", // Light green for disabled state
+  },
+  submitButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
   },
 });
 
