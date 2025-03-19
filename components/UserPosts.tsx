@@ -70,13 +70,6 @@ const UserPosts: React.FC<UserPostsProps> = ({
     <View style={profileStyles.postsContainer}>
       <Text style={profileStyles.sectionTitle}>Clips and Posts</Text>
 
-      {/* Display the total posts count with a flame icon */}
-      <View style={profileStyles.streakContainer}>
-        <Ionicons name="flame" size={24} color="#FF4500" />
-        {/* Fire icon from FontAwesome */}
-        <Text style={profileStyles.streakText}>{postsCount}</Text>
-      </View>
-
       {loading ? (
         <ActivityIndicator size="large" color="#ffffff" />
       ) : error ? (

@@ -7,7 +7,6 @@ const { width } = Dimensions.get("window"); // Get the screen width
 const profileStyles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
-    marginTop: 20,
   },
   gradient: {
     ...StyleSheet.absoluteFillObject,
@@ -165,7 +164,7 @@ const profileStyles = StyleSheet.create({
     marginBottom: 20,
     padding: 15,
     borderRadius: 8,
-    backgroundColor: "rgba(35, 35, 35, 0.5)",
+    backgroundColor: "rgba(7, 7, 7, 0.5)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

@@ -82,8 +82,9 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   headerWrapper: {
+    display: "none",
     width: "100%",
-    height: 90, // Increased for better spacing
+    height: 80, // Increased for better spacing
     position: "absolute",
     top: 0,
     left: 0,

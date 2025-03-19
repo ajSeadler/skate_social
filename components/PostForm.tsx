@@ -108,7 +108,7 @@ const { width } = Dimensions.get("window"); // Get screen width
 const styles = StyleSheet.create({
   container: {
     // backgroundColor: "rgba(35, 35, 35, 0.5)",
-    backgroundColor: "#222",
+    backgroundColor: "rgba(7, 7, 7, 0.5)",
 
     borderRadius: 10,
     padding: 20,

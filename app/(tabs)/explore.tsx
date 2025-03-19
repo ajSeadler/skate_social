@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 80,
+    paddingTop: 20,
     paddingBottom: 80,
   },
   titleContainer: {
@@ -199,8 +199,8 @@ const styles = StyleSheet.create({
   postContainer: {
     marginBottom: 20,
     padding: 15,
-    borderRadius: 8,
-    backgroundColor: "rgba(35, 35, 35, 0.5)",
+    borderRadius: 20,
+    backgroundColor: "rgba(7, 7, 7, 0.5)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
