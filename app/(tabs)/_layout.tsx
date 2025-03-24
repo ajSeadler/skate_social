@@ -8,6 +8,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const CustomHeader = ({ title }: { title: string }) => (
   <View style={styles.headerContainer}>
@@ -73,6 +74,15 @@ export default function TabLayout() {
           title: "Explore",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="paperplane.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: "Skate Spots",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="location-pin" size={28} color={color} />
           ),
         }}
       />

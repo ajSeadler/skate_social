@@ -105,7 +105,7 @@ app.post("/login", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1w",
     });
 
     res.json({ message: "Login successful", token });
@@ -225,6 +225,61 @@ app.get("/posts", async (req, res) => {
     res.json({ posts });
   } catch (err) {
     console.error("❌ Error fetching posts:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/skate-spots", verifyToken, async (req, res) => {
+  const { name, description, latitude, longitude, image_url, security_level } =
+    req.body;
+  const userId = req.userId;
+
+  if (!name || !latitude || !longitude) {
+    return res
+      .status(400)
+      .json({ error: "Name, latitude, and longitude are required" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO skate_spots (name, description, latitude, longitude, image_url, security_level) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
+       RETURNING id, name, description, latitude, longitude, image_url, security_level, created_at`,
+      [
+        name,
+        description || null,
+        latitude,
+        longitude,
+        image_url || null,
+        security_level || null,
+      ]
+    );
+
+    const newSpot = result.rows[0];
+    res
+      .status(201)
+      .json({ message: "Skate spot created successfully", spot: newSpot });
+  } catch (err) {
+    console.error("❌ Error creating skate spot:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get all skate spots (GET /skate-spots)
+app.get("/skate-spots", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM skate_spots ORDER BY created_at DESC"
+    );
+    const spots = result.rows;
+
+    if (spots.length === 0) {
+      return res.status(404).json({ message: "No skate spots found" });
+    }
+
+    res.json({ spots });
+  } catch (err) {
+    console.error("❌ Error fetching skate spots:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -19,6 +19,7 @@ const createTables = async () => {
     DROP TABLE IF EXISTS posts CASCADE;
     DROP TABLE IF EXISTS user_profiles CASCADE;
     DROP TABLE IF EXISTS users CASCADE;
+    DROP TABLE IF EXISTS skate_spots CASCADE;
 
     -- Create Users table
     CREATE TABLE IF NOT EXISTS users (
@@ -87,6 +88,17 @@ const createTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         read BOOLEAN DEFAULT FALSE -- To mark whether a message has been read
     );
+    CREATE TABLE IF NOT EXISTS skate_spots (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    latitude DECIMAL(9, 6),
+    longitude DECIMAL(9, 6),
+    image_url TEXT, -- Added image column
+    security_level VARCHAR(50), -- Added security level with a default
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
   `;
 
   try {
@@ -100,28 +112,112 @@ const createTables = async () => {
   }
 };
 
-// Function to seed the database with a default user and post
+const seedData = {
+  users: [
+    {
+      username: "ajskates",
+      email: "Aj@a.com",
+      password: "password",
+    },
+  ],
+  posts: [
+    {
+      user_id: 1,
+      content: "This is a default post!",
+    },
+  ],
+  skate_spots: [
+    {
+      name: "Twin Creek Ditch",
+      description: "A cool DIY spot with a ton of community support",
+      latitude: 35.44621,
+      longitude: -97.55712,
+      image_url:
+        "https://www.skatedeluxe.com/blog/wp-content/uploads/2018/09/obsctacle-guide-curb.jpg", // Add image URL
+      security_level: "low", // Add security level
+    },
+    {
+      name: "Butter Ledge",
+      description: "A ledge in Military Park in the Asian District",
+      latitude: 35.49465,
+      longitude: -97.53247,
+      image_url:
+        "https://www.skatedeluxe.com/blog/wp-content/uploads/2018/09/obsctacle-guide-curb.jpg",
+      security_level: "low",
+    },
+    {
+      name: "Round Flat Bar",
+      description:
+        "Round flat bar starting in a parking lot, leading into the sidewalk",
+      latitude: 35.46798,
+      longitude: -97.52311,
+      image_url:
+        "https://www.skatedeluxe.com/blog/wp-content/uploads/2018/09/obsctacle-guide-curb.jpg",
+      security_level: "medium",
+    },
+    {
+      name: "Long Flat Bar",
+      description:
+        "A long, but short in height, round flat bar in a parking lot. Outside of business hours only",
+      latitude: 35.4838,
+      longitude: -97.51575,
+      image_url:
+        "https://www.skatedeluxe.com/blog/wp-content/uploads/2018/09/obsctacle-guide-curb.jpg",
+      security_level: "medium",
+    },
+    {
+      name: "Ledge On Sidewalk",
+      description: "A staircase pressed up against building used as a ledge.",
+      latitude: 35.47614,
+      longitude: -97.51387,
+      image_url:
+        "https://www.skatedeluxe.com/blog/wp-content/uploads/2018/09/obsctacle-guide-curb.jpg",
+      security_level: "low",
+    },
+  ],
+};
+
 const seedDatabase = async () => {
   try {
     await pool.query("BEGIN"); // Start a transaction
 
-    // Insert default user
-    const userResult = await pool.query(
-      `INSERT INTO users (username, email, password) 
-       VALUES ($1, $2, $3) RETURNING id`,
-      ["defaultUser", "default@example.com", "hashedpassword123"]
-    );
-    const userId = userResult.rows[0].id;
+    // Seed users
+    for (let user of seedData.users) {
+      const userResult = await pool.query(
+        `INSERT INTO users (username, email, password) 
+         VALUES ($1, $2, $3) RETURNING id`,
+        [user.username, user.email, user.password]
+      );
+      const userId = userResult.rows[0].id;
 
-    // Insert default post linked to the user
-    await pool.query(
-      `INSERT INTO posts (user_id, content) 
-       VALUES ($1, $2)`,
-      [userId, "This is a default post!"]
-    );
+      // Insert posts linked to the user
+      for (let post of seedData.posts) {
+        await pool.query(
+          `INSERT INTO posts (user_id, content) 
+           VALUES ($1, $2)`,
+          [userId, post.content]
+        );
+      }
+
+      // Insert skate spots linked to the user
+      for (let spot of seedData.skate_spots) {
+        await pool.query(
+          `INSERT INTO skate_spots (name, description, latitude, longitude, image_url, security_level) 
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [
+            spot.name,
+            spot.description,
+            spot.latitude,
+            spot.longitude,
+            spot.image_url,
+            spot.security_level,
+          ]
+        );
+      }
+    }
 
     await pool.query("COMMIT"); // Commit transaction
-    console.log("✅ Default user and post created successfully.");
+    console.log("✅ Database seeded successfully with default data.");
   } catch (err) {
     await pool.query("ROLLBACK"); // Rollback transaction if any error
     console.error("❌ Error seeding the database:", err);

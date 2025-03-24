@@ -93,7 +93,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     <PaperProvider>
       <SafeAreaView style={profileStyles.safeAreaContainer}>
         <LinearGradient
-          colors={["#0f0c29", "#302b63", "#24243e"]}
+          colors={["#000000", "#0f172a", "#1e293b"]}
           style={profileStyles.gradient}
         >
           <KeyboardAvoidingView
