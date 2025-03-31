@@ -1,3 +1,4 @@
+// ProfileScreen.tsx
 import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
@@ -12,8 +13,7 @@ import { useRouter } from "expo-router";
 import profileStyles from "@/styles/profileStyles";
 import HomeScreen from "@/components/HomeScreen";
 import ProfileDetails from "@/components/ProfileDetails"; // ✅ Import the new component
-
-const API_URL = "http://localhost:5001";
+import { fetchProfileData, logout } from "@/hooks/api"; // Import the API functions
 
 const ProfileScreen = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -36,28 +36,12 @@ const ProfileScreen = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/profile`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          await AsyncStorage.removeItem("token");
-          setTokenFound(false);
-          setProfile(null);
-          router.replace("/");
-          return;
-        } else {
-          const errorData = await response.json();
-          setError(errorData.error || "Failed to fetch profile");
-        }
-      } else {
-        const data = await response.json();
-        setProfile(data);
-      }
+      const data = await fetchProfileData(token);
+      setProfile(data);
     } catch (err) {
-      setError("Error fetching profile data");
+      setError(
+        err instanceof Error ? err.message : "Error fetching profile data"
+      );
     } finally {
       setLoading(false);
     }
@@ -70,7 +54,7 @@ const ProfileScreen = () => {
   // Handle Logout
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem("token");
+      await logout();
       setProfile(null);
       setTokenFound(false);
       router.replace("/");

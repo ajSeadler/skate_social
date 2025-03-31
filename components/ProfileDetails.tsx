@@ -19,7 +19,6 @@ import {
   Portal,
   PaperProvider,
 } from "react-native-paper";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import profileStyles from "@/styles/profileStyles";
 import PostForm from "@/components/PostForm";
@@ -92,85 +91,80 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
   return (
     <PaperProvider>
       <SafeAreaView style={profileStyles.safeAreaContainer}>
-        <LinearGradient
-          colors={["#000000", "#0f172a", "#1e293b"]}
-          style={profileStyles.gradient}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          <ScrollView
+            contentContainerStyle={[
+              profileStyles.scrollViewContent,
+              { paddingBottom: 100 },
+            ]}
           >
-            <ScrollView
-              contentContainerStyle={[
-                profileStyles.scrollViewContent,
-                { paddingBottom: 100 },
-              ]}
-            >
-              <View style={profileStyles.profileHeader}>
-                {profile.profile_picture ? (
-                  <Avatar.Image
-                    size={120}
-                    source={{ uri: profile.profile_picture }}
-                    style={profileStyles.profileImage}
-                  />
-                ) : (
-                  <Avatar.Text
-                    size={100}
-                    label={getInitials(profile.first_name, profile.last_name)}
-                    style={profileStyles.profileImage}
-                  />
-                )}
-
-                <View style={profileStyles.headerRow}>
-                  <Text style={profileStyles.username}>
-                    @{profile.username}
-                  </Text>
-
-                  {/* IconButton for three horizontal dots */}
-                  <IconButton
-                    icon="dots-horizontal"
-                    size={24}
-                    iconColor="white"
-                    onPress={() => setModalVisible(true)} // Show modal on press
-                  />
-                </View>
-              </View>
-
-              <View style={profileStyles.profileCard}>
-                <View style={profileStyles.detailsRow}>
-                  <Ionicons name="person" size={20} color="#fff" />
-                  <Text style={profileStyles.detailsValue}>
-                    {profile.first_name} {profile.last_name}
-                  </Text>
-                </View>
-                <View style={profileStyles.detailsRow}>
-                  <Ionicons name="location" size={20} color="#fff" />
-                  <Text style={profileStyles.detailsValue}>
-                    {profile.location || "N/A"}
-                  </Text>
-                </View>
-                <View style={profileStyles.detailsRow}>
-                  <Ionicons name="mail" size={20} color="#fff" />
-                  <Text style={profileStyles.detailsValue}>
-                    {profile.email || "N/A"}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={profileStyles.postFormContainer}>
-                <PostForm onPostCreated={handlePostCreated} />
-              </View>
-
-              {/* Render UserPosts component here */}
-              <UserPosts
-                userPosts={userPosts}
-                loading={loading}
-                error={error}
-                fetchUserPosts={fetchUserPosts}
+            <View style={profileStyles.editProfile}>
+              <IconButton
+                icon="dots-horizontal"
+                size={24}
+                iconColor="white"
+                onPress={() => setModalVisible(true)} // Show modal on press
               />
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </LinearGradient>
+            </View>
+            <View style={profileStyles.profileHeader}>
+              {profile.profile_picture ? (
+                <Avatar.Image
+                  size={170}
+                  source={{ uri: profile.profile_picture }}
+                  style={profileStyles.profileImage}
+                />
+              ) : (
+                <Avatar.Text
+                  size={100}
+                  label={getInitials(profile.first_name, profile.last_name)}
+                  style={profileStyles.profileImage}
+                />
+              )}
+
+              <View style={profileStyles.headerRow}>
+                <Text style={profileStyles.username}>@{profile.username}</Text>
+
+                {/* IconButton for three horizontal dots */}
+              </View>
+            </View>
+
+            <View style={profileStyles.profileCard}>
+              <View style={profileStyles.detailsRow}>
+                <Ionicons name="person" size={20} color="#fff" />
+                <Text style={profileStyles.detailsValue}>
+                  {profile.first_name} {profile.last_name}
+                </Text>
+              </View>
+              <View style={profileStyles.detailsRow}>
+                <Ionicons name="location" size={20} color="#fff" />
+                <Text style={profileStyles.detailsValue}>
+                  {profile.location || "N/A"}
+                </Text>
+              </View>
+              <View style={profileStyles.detailsRow}>
+                <Ionicons name="mail" size={20} color="#fff" />
+                <Text style={profileStyles.detailsValue}>
+                  {profile.email || "N/A"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={profileStyles.postFormContainer}>
+              <PostForm onPostCreated={handlePostCreated} />
+            </View>
+
+            {/* Render UserPosts component here */}
+            <UserPosts
+              userPosts={userPosts}
+              loading={loading}
+              error={error}
+              fetchUserPosts={fetchUserPosts}
+            />
+          </ScrollView>
+        </KeyboardAvoidingView>
 
         {/* Modal for the three horizontal dots */}
         <Portal>

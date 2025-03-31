@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
+import { Region } from "react-native-maps";
 
 interface SkateSpot {
   id: number;
@@ -45,11 +46,12 @@ const groupSpotsBySecurityLevel = (spots: SkateSpot[]) => {
   }));
 };
 
-const Sidebar: React.FC<SidebarProps> = ({
+const Sidebar: React.FC<SidebarProps & { region: Region }> = ({
   visible,
   onClose,
   spots,
   onSpotSelect,
+  region,
 }) => {
   const slideAnim = useRef(
     new Animated.Value(Dimensions.get("window").height)
@@ -63,10 +65,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     }).start();
   }, [visible]);
 
-  if (!visible && slideAnim._value === Dimensions.get("window").height)
-    return null;
+  if (!visible) return null;
 
-  const sections = groupSpotsBySecurityLevel(spots);
+  // Filter spots that are inside the current region
+  const filteredSpots = spots.filter(
+    (spot) =>
+      spot.latitude >= region.latitude - region.latitudeDelta / 2 &&
+      spot.latitude <= region.latitude + region.latitudeDelta / 2 &&
+      spot.longitude >= region.longitude - region.longitudeDelta / 2 &&
+      spot.longitude <= region.longitude + region.longitudeDelta / 2
+  );
+
+  const sections = groupSpotsBySecurityLevel(filteredSpots);
 
   return (
     <Animated.View
@@ -78,8 +88,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Ionicons name="close" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
-      {spots.length === 0 ? (
-        <Text style={styles.noSpots}>No skate spots found.</Text>
+      {filteredSpots.length === 0 ? (
+        <Text style={styles.noSpots}>No skate spots found in this region.</Text>
       ) : (
         <SectionList
           sections={sections}
@@ -117,8 +127,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    width: "100%", // Ensure full width
-    height: "80%",
+    width: "108%",
+    height: "85%",
     backgroundColor: "#1a1a1a",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -134,6 +144,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
+    fontFamily: "Courier New",
     alignItems: "center",
     marginBottom: 10,
   },
@@ -142,6 +153,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "600",
     color: "#fff",
+    fontFamily: "Courier New",
   },
   closeButton: {
     padding: 5,
@@ -150,26 +162,30 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     fontSize: 16,
+    fontFamily: "Courier New",
     marginTop: 50,
   },
   sectionHeader: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#fff",
-    backgroundColor: "#F46036",
+    color: "#000",
+    backgroundColor: "#29ffa4",
     alignSelf: "flex-start", // ensures the bg only spans the content
     paddingVertical: 4,
     paddingHorizontal: 8,
+    fontFamily: "Courier New",
     borderRadius: 12,
     marginTop: 10,
   },
 
   listContent: {
     paddingBottom: 20,
+    fontFamily: "Courier New",
   },
   card: {
     flexDirection: "row",
     backgroundColor: "#292929",
+    fontFamily: "Courier New",
     padding: 12,
     borderRadius: 12,
     marginVertical: 8,
@@ -181,21 +197,24 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   image: {
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
     borderRadius: 10,
   },
   cardTextContainer: {
     flex: 1,
     marginLeft: 12,
+    fontFamily: "Courier New",
   },
   name: {
     fontSize: 18,
     fontWeight: "600",
     color: "white",
+    fontFamily: "Courier New",
   },
   description: {
     fontSize: 14,
+    fontFamily: "Courier New",
     color: "#aaa",
     marginTop: 4,
   },

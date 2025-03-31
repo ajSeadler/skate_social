@@ -229,22 +229,69 @@ app.get("/posts", async (req, res) => {
   }
 });
 
-app.post("/skate-spots", verifyToken, async (req, res) => {
-  const { name, description, latitude, longitude, image_url, security_level } =
-    req.body;
-  const userId = req.userId;
+app.get("/users", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, username, email, created_at FROM users ORDER BY created_at DESC"
+    );
+    res.json(result.rows); // This will return users' data
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-  if (!name || !latitude || !longitude) {
-    return res
-      .status(400)
-      .json({ error: "Name, latitude, and longitude are required" });
+app.get("/users/:id", async (req, res) => {
+  const userId = parseInt(req.params.id, 10); // Convert userId to an integer
+
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: "Invalid user ID" });
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO skate_spots (name, description, latitude, longitude, image_url, security_level) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
-       RETURNING id, name, description, latitude, longitude, image_url, security_level, created_at`,
+      "SELECT id, username, email, created_at FROM users WHERE id = $1",
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result.rows[0]); // Respond with the user's data
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// POST /skate-spots route with updated required fields
+app.post("/skate-spots", verifyToken, async (req, res) => {
+  const {
+    name,
+    description,
+    latitude,
+    longitude,
+    image_url,
+    security_level,
+    obstacles,
+    best_time_of_day,
+  } = req.body;
+  const userId = req.userId;
+
+  // Validate required fields
+  if (!name || !latitude || !longitude || !obstacles || !best_time_of_day) {
+    return res.status(400).json({
+      error:
+        "Name, latitude, longitude, obstacles, and best_time_of_day are required",
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO skate_spots (name, description, latitude, longitude, image_url, security_level, obstacles, best_time_of_day) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+       RETURNING id, name, description, latitude, longitude, image_url, security_level, obstacles, best_time_of_day, created_at`,
       [
         name,
         description || null,
@@ -252,6 +299,8 @@ app.post("/skate-spots", verifyToken, async (req, res) => {
         longitude,
         image_url || null,
         security_level || null,
+        obstacles,
+        best_time_of_day,
       ]
     );
 
@@ -265,7 +314,7 @@ app.post("/skate-spots", verifyToken, async (req, res) => {
   }
 });
 
-// Get all skate spots (GET /skate-spots)
+// GET /skate-spots route to fetch all skate spots
 app.get("/skate-spots", async (req, res) => {
   try {
     const result = await pool.query(

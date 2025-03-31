@@ -17,28 +17,35 @@ const CitySearch: React.FC<CitySearchProps> = ({ onCitySelect }) => {
   const searchCity = async () => {
     if (!query.trim()) return;
 
+    const abortController = new AbortController();
+
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${query}`,
+        { signal: abortController.signal }
       );
       const data = await response.json();
 
       if (data.length > 0) {
         const { lat, lon } = data[0];
         onCitySelect(parseFloat(lat), parseFloat(lon));
-      } else {
-        console.error("City not found");
       }
     } catch (error) {
-      console.error("Error fetching city data:", error);
+      if (error.name === "AbortError") {
+        console.log("Fetch request was aborted");
+      } else {
+        console.error("Error fetching city data:", error);
+      }
     }
+
+    return () => abortController.abort();
   };
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Search your city for spots..."
+        placeholder="Search for a city..."
         placeholderTextColor="#ccc"
         value={query}
         onChangeText={setQuery}
@@ -66,25 +73,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 8,
+    zIndex: 10, // Make sure it is on top of other elements
   },
   input: {
     flex: 1,
     height: 40,
     backgroundColor: "#1f1f2e",
+    fontFamily: "Courier New",
     color: "#fff",
     borderRadius: 8,
     paddingHorizontal: 15,
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#29ffa4",
     marginLeft: 10,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
+    zIndex: 99999, // Ensure it's above other elements
   },
   buttonText: {
-    color: "#fff",
+    color: "#000",
+    fontFamily: "Courier New",
     fontSize: 16,
     fontWeight: "600",
   },

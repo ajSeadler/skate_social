@@ -22,7 +22,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: "#29ffa4",
         headerTransparent: true,
         headerShadowVisible: false,
         header: ({ route, options }) => {
@@ -77,6 +77,16 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: "Search",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="location-pin" size={28} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="map"
         options={{

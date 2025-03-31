@@ -8,10 +8,12 @@ import {
   Dimensions,
   TouchableOpacity,
   RefreshControl,
+  SafeAreaView,
+  Text,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BlurView } from "expo-blur"; // Import BlurView
+import { Ionicons } from "@expo/vector-icons"; // Import Ionicons
+import { BlurView } from "expo-blur";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
@@ -23,7 +25,8 @@ export default function TabTwoScreen() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isOverlayVisible, setIsOverlayVisible] = useState<boolean>(false);
-  const [refreshing, setRefreshing] = useState<boolean>(false); // For pull-to-refresh
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("topPosts"); // Track active tab
 
   const getToken = async () => {
     try {
@@ -56,7 +59,7 @@ export default function TabTwoScreen() {
       setError("Error loading posts");
     } finally {
       setLoading(false);
-      setRefreshing(false); // Stop refreshing when data is loaded
+      setRefreshing(false);
     }
   };
 
@@ -65,11 +68,14 @@ export default function TabTwoScreen() {
     fetchPosts();
   }, []);
 
-  // Handle pull-to-refresh
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchPosts(); // Re-fetch posts on pull-to-refresh
+    await fetchPosts();
   }, []);
+
+  const handleTabPress = (tab: string) => {
+    setActiveTab(tab);
+  };
 
   if (loading) {
     return (
@@ -88,72 +94,96 @@ export default function TabTwoScreen() {
   }
 
   return (
-    <View style={styles.safeAreaContainer}>
-      <LinearGradient
-        colors={["#000000", "#0f172a", "#1e293b"]}
-        style={styles.gradient}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollViewContent}
-          keyboardShouldPersistTaps="handled"
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor="#ffffff"
-            />
-          }
+    <SafeAreaView style={styles.safeAreaContainer}>
+      {/* Header with Icons */}
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handleTabPress("topPosts")}
         >
-          {/* <ThemedView style={styles.titleContainer}>
-            <ThemedText type="title" style={styles.titleText}>
-              sesh.
-            </ThemedText>
-          </ThemedView> */}
+          <Ionicons
+            name="flame"
+            size={28}
+            color={activeTab === "topPosts" ? "#29ffa4" : "#fff"} // Active color
+          />
+          <Text
+            style={[
+              styles.iconLabel,
+              { color: activeTab === "topPosts" ? "#29ffa4" : "#fff" }, // Active color
+            ]}
+          >
+            Top Posts
+          </Text>
+        </TouchableOpacity>
 
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <ThemedView key={post.id} style={styles.postContainer}>
-                <ThemedText type="defaultSemiBold" style={styles.username}>
-                  @{post.username}
-                </ThemedText>
-                <ThemedText style={styles.content}>{post.content}</ThemedText>
-                {post.image_url && (
-                  <Image
-                    source={{ uri: post.image_url }}
-                    style={styles.postImage}
-                  />
-                )}
-                <ThemedText style={styles.timestamp}>
-                  {new Date(post.created_at).toLocaleString()}
-                </ThemedText>
-              </ThemedView>
-            ))
-          ) : (
-            <ThemedText style={styles.noPosts}>No posts available</ThemedText>
-          )}
-        </ScrollView>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handleTabPress("trending")}
+        >
+          <Ionicons
+            name="trending-up"
+            size={28}
+            color={activeTab === "trending" ? "#29ffa4" : "#fff"} // Active color
+          />
+          <Text
+            style={[
+              styles.iconLabel,
+              { color: activeTab === "trending" ? "#29ffa4" : "#fff" }, // Active color
+            ]}
+          >
+            Trending
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Blurred Overlay */}
-        {isOverlayVisible && (
-          <BlurView intensity={50} tint="dark" style={styles.overlay}>
-            <ThemedText style={styles.overlayText}>
-              Please create an account to view awesome skate content.
-            </ThemedText>
-          </BlurView>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#ffffff"
+          />
+        }
+      >
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <ThemedView key={post.id} style={styles.postContainer}>
+              <ThemedText type="defaultSemiBold" style={styles.username}>
+                @{post.username}
+              </ThemedText>
+              <ThemedText style={styles.content}>{post.content}</ThemedText>
+              {post.image_url && (
+                <Image
+                  source={{ uri: post.image_url }}
+                  style={styles.postImage}
+                />
+              )}
+              <ThemedText style={styles.timestamp}>
+                {new Date(post.created_at).toLocaleString()}
+              </ThemedText>
+            </ThemedView>
+          ))
+        ) : (
+          <ThemedText style={styles.noPosts}>No posts available</ThemedText>
         )}
-      </LinearGradient>
-    </View>
+      </ScrollView>
+
+      {isOverlayVisible && (
+        <BlurView intensity={50} tint="dark" style={styles.overlay}>
+          <ThemedText style={styles.overlayText}>
+            Please create an account to view awesome skate content.
+          </ThemedText>
+        </BlurView>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeAreaContainer: {
     flex: 1,
-  },
-  gradient: {
-    flex: 1,
+    backgroundColor: "#0F0F0F",
   },
   scrollView: {
     paddingBottom: 70,
@@ -167,22 +197,22 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: "row",
-    gap: 8,
-    marginBottom: 20,
-    paddingHorizontal: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 10,
     backgroundColor: "transparent",
     width: width,
   },
   titleText: {
-    fontSize: 28,
-    fontWeight: "900",
+    fontSize: 36,
+    fontWeight: "bold",
     color: "#fff",
-    textAlign: "left",
-    fontFamily: "Urbanist_700Bold",
-    letterSpacing: 2,
-    textShadowColor: "rgba(255, 255, 255, 0.3)",
+    // fontFamily: "Courier New",
+    textAlign: "center",
+    letterSpacing: 3,
+    textShadowColor: "rgba(255, 255, 255, 0.5)",
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    textShadowRadius: 5,
   },
   loadingContainer: {
     flex: 1,
@@ -200,7 +230,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 15,
     borderRadius: 20,
-    backgroundColor: "rgba(7, 7, 7, 0.5)",
+    backgroundColor: "transparent",
+    borderColor: "#ccc",
+    borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -209,13 +241,21 @@ const styles = StyleSheet.create({
     width: width * 0.9,
   },
   username: {
-    fontWeight: "bold",
-    color: "#FFFFFF",
-    marginBottom: 10,
+    fontWeight: "900",
+    color: "#fff",
+    textAlign: "left",
+    // fontFamily: "Courier New",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    fontSize: 20,
+    marginBottom: 5,
   },
   content: {
-    color: "#E0E0E0",
+    fontSize: 16,
+    color: "#fff",
     marginBottom: 10,
+    // fontFamily: "Courier New",
+    textAlign: "left",
   },
   postImage: {
     width: "100%",
@@ -227,15 +267,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 12,
     color: "#A0A0A0",
+    // fontFamily: "Courier New",
   },
   noPosts: {
     color: "#A0A0A0",
     fontSize: 16,
     textAlign: "center",
     marginTop: 20,
+    fontFamily: "Courier New",
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject, // Makes the overlay cover the entire screen
+    ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
@@ -246,16 +288,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-  button: {
-    padding: 12,
-    backgroundColor: "#FF5733",
-    borderRadius: 8,
-    width: 200,
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingVertical: 15,
+    width: "100%",
+  },
+  iconButton: {
     alignItems: "center",
   },
-  buttonText: {
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: "bold",
+  iconLabel: {
+    fontSize: 14,
+    marginTop: 5,
+    // fontFamily: "Courier New",
   },
 });

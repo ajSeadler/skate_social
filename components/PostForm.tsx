@@ -123,6 +123,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     marginBottom: 15,
+    // fontFamily: "Courier New",
+
     fontSize: 16,
     fontWeight: "400",
     width: "100%", // Ensure inputs fill the container width
@@ -135,13 +137,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 10,
     shadowColor: "#000",
+    // fontFamily: "Courier New",
+
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5, // For Android shadow
   },
   buttonActive: {
-    backgroundColor: "#4CAF50", // Green button for active state
+    backgroundColor: "#29ffa4", // Green button for active state
   },
   buttonDisabled: {
     backgroundColor: "#A5D6A7", // Light green for disabled state
@@ -149,7 +153,9 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    // fontFamily: "Courier New",
+
+    color: "#000",
   },
 });
 
