@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
     backgroundColor: "#222",
@@ -105,7 +104,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    fontFamily: "Courier New",
     color: "#fff",
     marginBottom: 15,
     textAlign: "center",
@@ -118,7 +116,6 @@ const styles = StyleSheet.create({
   },
   description: {
     color: "#fff",
-    fontFamily: "Courier New",
     fontSize: 18,
     marginBottom: 15,
     textAlign: "justify",
@@ -134,7 +131,6 @@ const styles = StyleSheet.create({
   infoText: {
     color: "#fff",
     fontSize: 18,
-    fontFamily: "Courier New",
   },
   closeButton: {
     flexDirection: "row",
@@ -149,7 +145,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
     fontSize: 18,
-    fontFamily: "Courier New",
     marginLeft: 8,
   },
   closeIcon: {},

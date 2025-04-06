@@ -73,7 +73,7 @@ const LoginForm = () => {
         />
       </View>
       <LinearGradient
-        colors={["#6a11cb", "#2575fc"]} // Blue to purple gradient
+        colors={["#29ffa4", "#29ffa4"]} // Blue to purple gradient
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.loginButton}
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     color: "#fff", // Ensure icon is visible with a white color
   },
   loginButton: {
-    backgroundColor: "transparent", // Transparent background for a more minimalist look
+    backgroundColor: "transparent",
     borderRadius: 30,
     paddingVertical: 12,
     paddingHorizontal: 30,
@@ -152,13 +152,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
     marginTop: 20,
-    backgroundImage: "linear-gradient(to right, #6a11cb, #2575fc)", // Blue to purple gradient
   },
 
   loginButtonText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff", // White text
+    color: "#000", // White text
     textAlign: "center",
   },
   loginButtonContent: {

@@ -229,10 +229,9 @@ const styles = StyleSheet.create({
   postContainer: {
     marginBottom: 20,
     padding: 15,
-    borderRadius: 20,
-    backgroundColor: "transparent",
-    borderColor: "#ccc",
-    borderWidth: 1,
+    borderRadius: 12,
+    backgroundColor: "#1E1E1E",
+
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

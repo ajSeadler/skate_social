@@ -5,10 +5,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: -1,
-  },
+
   container: {
     flexGrow: 1,
     justifyContent: "center",
@@ -34,7 +31,7 @@ export const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 48, // Larger text to make a statement
     fontWeight: "900", // Boldest weight for maximum emphasis
-    color: "#fff", // White text to contrast with the dark background
+    color: "#29ffa4",
     textAlign: "center", // Center the text
     fontFamily: "Urbanist_700Bold", // Use a bold, modern font
     letterSpacing: 2, // Slight letter spacing for a clean look

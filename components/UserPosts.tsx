@@ -68,8 +68,6 @@ const UserPosts: React.FC<UserPostsProps> = ({
 
   return (
     <View style={profileStyles.postsContainer}>
-      <Text style={profileStyles.sectionTitle}>Clips and Posts</Text>
-
       {loading ? (
         <ActivityIndicator size="large" color="#ffffff" />
       ) : error ? (

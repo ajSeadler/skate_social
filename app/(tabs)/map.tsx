@@ -4,20 +4,19 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   TextInput,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import MapView, { Marker, Region, MapEvent } from "react-native-maps";
 import * as Location from "expo-location";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import CitySearch from "@/components/CitySearch";
 import Sidebar from "@/components/Sidebar";
 import debounce from "lodash.debounce";
 import Animated from "react-native-reanimated";
-import { fetchSkateSpots, addSkateSpot } from "@/hooks/api"; // ✅ Import API functions
-import SpotDetailsModal from "@/components/SpotDetailsModal"; // ✅ Import the new modal component
+import { fetchSkateSpots, addSkateSpot } from "@/hooks/api";
+import SpotDetailsModal from "@/components/SpotDetailsModal";
 
 // Define types for skate spot data
 export interface SkateSpot {
@@ -31,6 +30,7 @@ export interface SkateSpot {
 }
 
 const SkateSpotMap: React.FC = () => {
+  const [mapLoaded, setMapLoaded] = useState(false);
   const mapViewRef = useRef<MapView | null>(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [region, setRegion] = useState<Region>({
@@ -52,8 +52,18 @@ const SkateSpotMap: React.FC = () => {
   });
   const [selectedSpot, setSelectedSpot] = useState<SkateSpot | null>(null);
   const [spotModalVisible, setSpotModalVisible] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+
+  const loadMap = async () => {
+    setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate loading delay
+    setMapLoaded(true);
+    setLoading(false);
+  };
 
   useEffect(() => {
+    if (!mapLoaded) return;
+
     let isMounted = true;
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -75,9 +85,8 @@ const SkateSpotMap: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [mapLoaded]);
 
-  // Open spot details modal when a marker is pressed
   const handleMarkerPress = (spot: SkateSpot) => {
     setSelectedSpot(spot);
     setSpotModalVisible(true);
@@ -97,39 +106,8 @@ const SkateSpotMap: React.FC = () => {
     handleMarkerPress(spot);
   };
 
-  const getSecurityColor = (level: string) => {
-    switch (level.toLowerCase()) {
-      case "low":
-        return "green";
-      case "medium":
-        return "orange";
-      case "high":
-        return "red";
-      default:
-        return "gray";
-    }
-  };
-
-  const handleAddSpot = async () => {
-    const addedSpot = await addSkateSpot(newSpot);
-    if (addedSpot && addedSpot.spot) {
-      setSpots((prevSpots) => [...prevSpots, addedSpot.spot]);
-      setFormVisible(false);
-      setNewSpot({
-        id: 0,
-        name: "",
-        description: "",
-        latitude: 0,
-        longitude: 0,
-        image_url: "",
-        security_level: "",
-      });
-    }
-  };
-
   const handleLongPress = useCallback((event: MapEvent) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    console.log("Long press detected at:", latitude, longitude);
     setNewSpot((prev) => ({
       ...prev,
       latitude,
@@ -149,27 +127,37 @@ const SkateSpotMap: React.FC = () => {
     mapViewRef.current?.animateToRegion(newRegion, 1000);
   };
 
-  const prevRegion = useRef(region);
-
-  // Wrap the debounced function in useCallback
   const handleRegionChangeComplete = useCallback(
     debounce(async (newRegion: Region) => {
       const newSpots = await fetchSkateSpots(
         newRegion.latitude,
         newRegion.longitude
       );
-      setSpots(newSpots); // Replace previous spots instead of appending
+      setSpots(newSpots);
       setRegion(newRegion);
     }, 1000),
     []
   );
 
-  // Cancel the debounced function on component unmount
   useEffect(() => {
     return () => {
       handleRegionChangeComplete.cancel();
     };
   }, [handleRegionChangeComplete]);
+
+  if (!mapLoaded) {
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.loadButton} onPress={loadMap}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#fff" />
+          ) : (
+            <Text style={styles.loadButtonText}>Load Map</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -186,7 +174,6 @@ const SkateSpotMap: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Sidebar */}
       <Animated.View
         style={[
           styles.sidebarContainer,
@@ -198,11 +185,10 @@ const SkateSpotMap: React.FC = () => {
           onClose={() => setSidebarVisible(false)}
           spots={spots}
           onSpotSelect={handleSpotSelect}
-          region={region} // Pass the current region
+          region={region}
         />
       </Animated.View>
 
-      {/* Map */}
       <MapView
         ref={mapViewRef}
         style={styles.map}
@@ -222,133 +208,6 @@ const SkateSpotMap: React.FC = () => {
         ))}
       </MapView>
 
-      {/* Modal for Adding New Skate Spot */}
-      <Modal visible={formVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Add New Skate Spot</Text>
-
-            {/* Name Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Name"
-              placeholderTextColor="#ccc"
-              value={newSpot.name}
-              onChangeText={(text) =>
-                setNewSpot((prev) => ({ ...prev, name: text }))
-              }
-            />
-
-            {/* Description Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Description"
-              placeholderTextColor="#ccc"
-              value={newSpot.description}
-              onChangeText={(text) =>
-                setNewSpot((prev) => ({ ...prev, description: text }))
-              }
-            />
-
-            {/* Image URL Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Image URL"
-              placeholderTextColor="#ccc"
-              value={newSpot.image_url}
-              onChangeText={(text) =>
-                setNewSpot((prev) => ({ ...prev, image_url: text }))
-              }
-            />
-
-            {/* Security Level Buttons */}
-            <View style={styles.securityButtonContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.securityButton,
-                  newSpot.security_level === "low" &&
-                    styles.selectedSecurityButton,
-                ]}
-                onPress={() =>
-                  setNewSpot((prev) => ({ ...prev, security_level: "low" }))
-                }
-              >
-                <Text style={styles.securityButtonText}>low</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.securityButton,
-                  newSpot.security_level === "medium" &&
-                    styles.selectedSecurityButton,
-                ]}
-                onPress={() =>
-                  setNewSpot((prev) => ({ ...prev, security_level: "medium" }))
-                }
-              >
-                <Text style={styles.securityButtonText}>medium</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.securityButton,
-                  newSpot.security_level === "high" &&
-                    styles.selectedSecurityButton,
-                ]}
-                onPress={() =>
-                  setNewSpot((prev) => ({ ...prev, security_level: "high" }))
-                }
-              >
-                <Text style={styles.securityButtonText}>high</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Time of Day Section */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Best Time of Day</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Morning, Afternoon, Evening"
-                placeholderTextColor="#ccc"
-                value={newSpot.best_time_of_day}
-                onChangeText={(text) =>
-                  setNewSpot((prev) => ({ ...prev, best_time_of_day: text }))
-                }
-              />
-            </View>
-
-            {/* Obstacles Section */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Obstacles</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Rails, Ledges, Stairs"
-                placeholderTextColor="#ccc"
-                value={newSpot.obstacles}
-                onChangeText={(text) =>
-                  setNewSpot((prev) => ({ ...prev, obstacles: text }))
-                }
-              />
-            </View>
-
-            {/* Buttons */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                onPress={handleAddSpot}
-                style={styles.addButton}
-              >
-                <Text style={styles.buttonText}>Add Spot</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setFormVisible(false)}
-                style={styles.cancelButton}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Spot Details Modal */}
       <SpotDetailsModal
         visible={spotModalVisible}
         spot={selectedSpot}
@@ -359,7 +218,7 @@ const SkateSpotMap: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, justifyContent: "center", alignItems: "center" },
   map: { ...StyleSheet.absoluteFillObject },
   sidebarToggle: {
     position: "absolute",
@@ -402,80 +261,16 @@ const styles = StyleSheet.create({
     color: "#000",
     letterSpacing: 1.2,
     textAlign: "center",
-    fontFamily: "Courier New",
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  formContainer: {
-    width: "90%",
-    backgroundColor: "#333",
+  loadButton: {
+    backgroundColor: "#29ffa4",
+    padding: 15,
     borderRadius: 10,
-    padding: 20,
   },
-  formTitle: {
+  loadButtonText: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-    fontFamily: "Courier New",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    fontFamily: "Courier New",
-    color: "#fff",
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 10,
-  },
-  securityButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 10,
-  },
-  securityButton: {
-    backgroundColor: "#eee",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  selectedSecurityButton: {
-    backgroundColor: "#29ffa4",
-  },
-  securityButtonText: {
-    textTransform: "lowercase",
-    fontWeight: "600",
-    fontFamily: "Courier New",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  addButton: {
-    backgroundColor: "#29ffa4",
-    padding: 10,
-    borderRadius: 6,
-    flex: 1,
-    marginRight: 5,
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: "#f44336",
-    padding: 10,
-    borderRadius: 6,
-    flex: 1,
-    marginLeft: 5,
-    alignItems: "center",
-  },
-  buttonText: {
     color: "#000",
-    fontWeight: "600",
-    fontFamily: "Courier New",
+    fontWeight: "bold",
   },
 });
 

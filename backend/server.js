@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("./db");
 
+require("dotenv").config();
+
 const app = express();
 app.use(cors());
 app.use(express.json()); // Middleware to parse JSON request bodies
@@ -15,7 +17,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1]; // Expect the token in the Authorization header (e.g., 'Bearer <token>')
-
   if (!token) {
     return res.status(401).json({ error: "Access denied. No token provided." });
   }
@@ -120,9 +121,9 @@ app.get("/profile", verifyToken, async (req, res) => {
   const userId = req.userId; // The userId is available here due to the middleware
 
   try {
-    // Fetch user data from the users table
+    // Fetch user data from the users table including created_at
     const userResult = await pool.query(
-      "SELECT username, email FROM users WHERE id = $1",
+      "SELECT username, email, created_at FROM users WHERE id = $1",
       [userId]
     );
     if (userResult.rows.length === 0) {
@@ -139,7 +140,10 @@ app.get("/profile", verifyToken, async (req, res) => {
     }
 
     const userProfile = profileResult.rows[0];
-    res.json({ ...userResult.rows[0], ...userProfile }); // Combine user and profile data and send it as response
+    const userData = userResult.rows[0];
+
+    // Combine user and profile data and send it as response
+    res.json({ ...userData, ...userProfile });
   } catch (err) {
     console.error("❌ Error fetching user profile:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -162,11 +166,11 @@ app.post("/posts", verifyToken, async (req, res) => {
     const postResult = await pool.query(
       `INSERT INTO posts (user_id, content, image_url) 
        VALUES ($1, $2, $3) RETURNING id, content, image_url, created_at`,
-      [userId, content, image_url || null] // Use null if no image URL is provided
+      [userId, content, image_url || null]
     );
 
     const newPost = postResult.rows[0];
-    console.log("Post created:", newPost); // Log the newly created post
+    console.log("Post created:", newPost);
     res
       .status(201)
       .json({ message: "Post created successfully", post: newPost });
@@ -176,7 +180,6 @@ app.post("/posts", verifyToken, async (req, res) => {
   }
 });
 
-// GET route to view all posts made by the logged-in user (GET /my-posts)
 // GET route to view all posts made by the logged-in user (GET /my-posts)
 app.get("/my-posts", verifyToken, async (req, res) => {
   const userId = req.userId; // Extract userId from token
@@ -209,7 +212,6 @@ app.get("/my-posts", verifyToken, async (req, res) => {
 // GET route to view all posts (GET /posts)
 app.get("/posts", async (req, res) => {
   try {
-    // Fetch all posts along with user information (e.g., username)
     const postsResult = await pool.query(
       `SELECT p.id, p.content, p.image_url, p.created_at, u.username 
        FROM posts p
@@ -229,28 +231,35 @@ app.get("/posts", async (req, res) => {
   }
 });
 
+// GET route to view all users (GET /users)
 app.get("/users", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT id, username, email, created_at FROM users ORDER BY created_at DESC"
     );
-    res.json(result.rows); // This will return users' data
+    res.json(result.rows);
   } catch (err) {
     console.error("Error fetching users:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+// GET route to view a specific user by id (GET /users/:id)
 app.get("/users/:id", async (req, res) => {
-  const userId = parseInt(req.params.id, 10); // Convert userId to an integer
-
+  const userId = parseInt(req.params.id, 10);
   if (isNaN(userId)) {
     return res.status(400).json({ error: "Invalid user ID" });
   }
 
   try {
     const result = await pool.query(
-      "SELECT id, username, email, created_at FROM users WHERE id = $1",
+      `SELECT users.id, users.username, users.email, users.created_at,
+              user_profiles.first_name, user_profiles.last_name, 
+              user_profiles.profile_picture, user_profiles.bio, 
+              user_profiles.location, user_profiles.age
+       FROM users 
+       LEFT JOIN user_profiles ON users.id = user_profiles.user_id
+       WHERE users.id = $1`,
       [userId]
     );
 
@@ -258,14 +267,14 @@ app.get("/users/:id", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json(result.rows[0]); // Respond with the user's data
+    res.json(result.rows[0]);
   } catch (err) {
     console.error("Error fetching user:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// POST /skate-spots route with updated required fields
+// POST route to create a new skate spot (POST /skate-spots)
 app.post("/skate-spots", verifyToken, async (req, res) => {
   const {
     name,
@@ -314,7 +323,7 @@ app.post("/skate-spots", verifyToken, async (req, res) => {
   }
 });
 
-// GET /skate-spots route to fetch all skate spots
+// GET route to fetch all skate spots (GET /skate-spots)
 app.get("/skate-spots", async (req, res) => {
   try {
     const result = await pool.query(
@@ -332,5 +341,79 @@ app.get("/skate-spots", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// ================= Favorites Endpoints =================
+
+// POST route to add a favorite skate spot (POST /favorites)
+app.post("/favorites", verifyToken, async (req, res) => {
+  const userId = req.userId;
+  const { skate_spot_id } = req.body;
+
+  if (!skate_spot_id) {
+    return res.status(400).json({ error: "skate_spot_id is required" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO favorites (user_id, skate_spot_id) VALUES ($1, $2) RETURNING id, created_at`,
+      [userId, skate_spot_id]
+    );
+    res
+      .status(201)
+      .json({ message: "Favorite added", favorite: result.rows[0] });
+  } catch (err) {
+    console.error("❌ Error adding favorite:", err);
+    // Check for unique violation error code
+    if (err.code === "23505") {
+      return res.status(400).json({ error: "Skate spot already favorited" });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// DELETE route to remove a favorite (DELETE /favorites/:skate_spot_id)
+app.delete("/favorites/:skate_spot_id", verifyToken, async (req, res) => {
+  const userId = req.userId;
+  const skateSpotId = req.params.skate_spot_id;
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM favorites WHERE user_id = $1 AND skate_spot_id = $2 RETURNING id`,
+      [userId, skateSpotId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Favorite not found" });
+    }
+
+    res.json({ message: "Favorite removed" });
+  } catch (err) {
+    console.error("❌ Error removing favorite:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET route to get all favorite skate spots for the logged-in user (GET /favorites)
+app.get("/favorites", verifyToken, async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    const result = await pool.query(
+      `SELECT f.id as favorite_id, s.*
+       FROM favorites f
+       JOIN skate_spots s ON f.skate_spot_id = s.id
+       WHERE f.user_id = $1
+       ORDER BY f.created_at DESC`,
+      [userId]
+    );
+
+    res.json({ favorites: result.rows });
+  } catch (err) {
+    console.error("❌ Error fetching favorites:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ======================================================
 
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

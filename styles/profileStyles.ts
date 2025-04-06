@@ -14,23 +14,21 @@ const profileStyles = StyleSheet.create({
     flexGrow: 1, // This ensures the ScrollView content can grow and fill up remaining space
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 80,
+    paddingTop: 20,
   },
   profileHeader: {
     width: "100%",
     paddingHorizontal: 20,
     alignItems: "center",
-    marginBottom: 10,
   },
   username: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#29ffa4",
     textAlign: "left",
     // fontFamily: "Courier New",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
-    marginBottom: 5,
   },
 
   profileImage: {
@@ -65,7 +63,6 @@ const profileStyles = StyleSheet.create({
   detailsRow: {
     flexDirection: "row",
     alignItems: "center", // Aligns the icon and text vertically
-    marginBottom: 10,
   },
   detailsLabel: {
     fontSize: 18,
@@ -74,7 +71,7 @@ const profileStyles = StyleSheet.create({
     marginLeft: 10, // Added space between the icon and the label
   },
   detailsValue: {
-    fontSize: 18,
+    fontSize: 20,
     color: "#fff",
     marginLeft: 1,
     fontFamily: "Inter",
@@ -146,10 +143,8 @@ const profileStyles = StyleSheet.create({
   postCard: {
     marginBottom: 20,
     padding: 15,
-    borderRadius: 20,
-    backgroundColor: "transparent",
-    borderColor: "#ccc",
-    borderWidth: 1,
+    borderRadius: 12,
+    backgroundColor: "#1E1E1E",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   type User = {
     id: number;
@@ -24,7 +25,7 @@ export default function SearchScreen() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const router = useRouter(); // ✅ Correct Expo Router navigation
+  const router = useRouter();
 
   useEffect(() => {
     fetchUsers();
@@ -32,13 +33,27 @@ export default function SearchScreen() {
 
   const fetchUsers = async () => {
     setLoading(true);
+    setError(null);
     try {
+      // If you want to require authentication, add an Authorization header.
+      // const token = "YOUR_JWT_TOKEN_HERE"; // Replace with your stored token
+      // const response = await fetch("http://localhost:5001/users", {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+
+      // For now, we’re calling the public endpoint
       const response = await fetch("http://localhost:5001/users");
+
+      // Check for unauthorized errors
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("You must be logged in to view this content.");
+      }
+
       const data: User[] = await response.json();
       setUsers(data);
       setFilteredUsers(data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+    } catch (error: any) {
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -50,7 +65,7 @@ export default function SearchScreen() {
       setFilteredUsers(users);
       return;
     }
-
+    // Optional: Debounce the search if necessary
     setLoading(true);
     setTimeout(() => {
       const filtered = users.filter((user) =>
@@ -62,9 +77,11 @@ export default function SearchScreen() {
   };
 
   const handleUserPress = (userId: number) => {
+    // Navigate to the user's profile; if this route is protected on the server,
+    // it should return a 401/403 error if the user isn’t logged in.
     router.push({
       pathname: "/userProfile/[userId]",
-      params: { userId: userId.toString() }, // Fix: Convert number to string
+      params: { userId: userId.toString() },
     });
   };
 
@@ -82,7 +99,12 @@ export default function SearchScreen() {
           />
         </View>
 
-        {loading ? (
+        {error ? (
+          <View style={styles.errorContainer}>
+            <Ionicons name="warning-outline" size={40} color="#ff4d4d" />
+            <Text style={styles.errorMessage}>{error}</Text>
+          </View>
+        ) : loading ? (
           <ActivityIndicator
             size="large"
             color="#29ffa4"
@@ -162,5 +184,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginTop: 20,
+  },
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  errorMessage: {
+    color: "#ff4d4d",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 10,
+    fontWeight: "bold",
   },
 });

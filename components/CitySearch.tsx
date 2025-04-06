@@ -79,7 +79,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     backgroundColor: "#1f1f2e",
-    fontFamily: "Courier New",
     color: "#fff",
     borderRadius: 8,
     paddingHorizontal: 15,
@@ -95,7 +94,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#000",
-    fontFamily: "Courier New",
     fontSize: 16,
     fontWeight: "600",
   },
